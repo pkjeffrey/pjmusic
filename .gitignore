@@ -1,0 +1,16 @@
+*.class
+*.jar
+.nrepl-port
+/.env
+/.idea
+/.lein-*
+/checkouts
+/classes
+/lib
+/log
+/node_modules
+/target
+dev-config.edn
+pom.xml
+profiles.clj
+test-config.edn
