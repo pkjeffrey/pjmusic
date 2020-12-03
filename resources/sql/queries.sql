@@ -36,20 +36,6 @@ WHERE T.ARTIST = :id
 AND T.ARTIST <> R.ARTIST
 ORDER BY R.RELEASED, R.ADDED
 
--- :name get-release :? :1
-SELECT R.ID,
-       A.ID ARTISTID,
-       A.NAME ARTISTNAME,
-       R.TITLE,
-       R.RELEASED,
-       R.LABEL,
-       R.CATALOG,
-       R.COMPILATION
-FROM RELEASE R
-INNER JOIN ARTIST A
-    ON A.ID = R.ARTIST
-WHERE R.ID = :id
-
 -- :name get-release-art :? :1
 SELECT ART
 FROM RELEASE
@@ -87,15 +73,66 @@ INNER JOIN ARTIST A
 WHERE T.MEDIA = :id
 ORDER BY T.SIDE, T.NUMBER
 
--- :name get-recent-releases :? :*
+-- ==================================================================
+
+-- :name get-release :? :1
 SELECT R.ID,
-       A.ID ARTISTID,
-       A.NAME ARTISTNAME,
+       A.ID "ARTIST-ID",
+       A.NAME "ARTIST-NAME",
        R.TITLE,
        R.RELEASED,
-       R.COMPILATION
+       R.LABEL,
+       R.CATALOG,
+       R.COMPILATION,
+       R.ADDED
+FROM RELEASE R
+INNER JOIN ARTIST A
+    ON A.ID = R.ARTIST
+WHERE R.ID = :id
+
+-- :name get-recent-releases :? :*
+SELECT R.ID,
+       A.ID "ARTIST-ID",
+       A.NAME "ARTIST-NAME",
+       R.TITLE,
+       R.RELEASED,
+       R.COMPILATION,
+       R.ADDED
 FROM RELEASE R
 INNER JOIN ARTIST A
     ON A.ID = R.ARTIST
 ORDER BY R.ADDED DESC
 FETCH FIRST :num ROWS ONLY
+
+-- :name get-releases-by-artist :? :*
+SELECT R.ID,
+       A.ID "ARTIST-ID",
+       A.NAME "ARTIST-NAME",
+       R.TITLE,
+       R.RELEASED,
+       R.COMPILATION,
+       R.ADDED
+FROM RELEASE R
+INNER JOIN ARTIST A
+    ON A.ID = R.ARTIST
+WHERE A.ID = :artist-id
+ORDER BY R.RELEASED, R.ADDED
+
+-- :name get-releases-feature-artist :? :*
+SELECT DISTINCT R.ID,
+                A.ID "ARTIST-ID",
+                A.NAME "ARTIST-NAME",
+                R.TITLE,
+                R.RELEASED,
+                R.COMPILATION,
+                R.ADDED
+FROM RELEASE R
+INNER JOIN ARTIST A
+    ON A.ID = R.ARTIST
+INNER JOIN MEDIA M
+    ON M.RELEASE = R.ID
+INNER JOIN TRACK T
+    ON T.MEDIA = M.ID
+WHERE T.ARTIST = :artist-id
+  AND T.ARTIST <> R.ARTIST
+ORDER BY R.RELEASED, R.ADDED

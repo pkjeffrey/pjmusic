@@ -3,7 +3,7 @@
     [clojure.string :as str]
     [pjmusic.db.core :as db]))
 
-(defn media-description
+(defn- media-description
   [id]
   (->> {:id id}
        db/get-release-media-descrs
@@ -11,22 +11,21 @@
               (if (= 1 cnt) name (str cnt name))))
        (str/join "+")))
 
-(defn compilation->boolean
-  [{:keys [compilation] :as release}]
-  (assoc release :compilation (= "Y" compilation)))
+(defn- db->release
+  [{:keys [id compilation] :as db-release}]
+  (assoc db-release :compilation (= "Y" compilation)
+                    :media-descr (media-description id)))
 
-(defn get
+(defn- select-releases
+  [db-fn params]
+  (->> (db-fn params)
+       (map db->release)))
+
+(defn by-id
   [id]
-  (let [release (->> {:id id}
-                     db/get-release
-                     compilation->boolean)
-        media-descr (media-description id)
-        medias (->> {:id id}
-                    db/get-release-medias
-                    (map (fn [{:keys [id] :as media}]
-                           (assoc media :tracks (db/get-media-tracks {:id id})))))]
-    (assoc release :media-descr media-descr
-                   :medias medias)))
+  (-> {:id id}
+      db/get-release
+      db->release))
 
 (defn image
   [id]
@@ -34,8 +33,12 @@
 
 (defn recent
   [number]
-  (->> {:num number}
-       db/get-recent-releases
-       (map (fn [{:keys [id compilation] :as release}]
-              (assoc release :compilation (= "Y" compilation)
-                             :media-descr (media-description id))))))
+  (select-releases db/get-recent-releases {:num number}))
+
+(defn by-artist
+  [artist-id]
+  (select-releases db/get-releases-by-artist {:artist-id artist-id}))
+
+(defn feature-artist
+  [artist-id]
+  (select-releases db/get-releases-feature-artist {:artist-id artist-id}))

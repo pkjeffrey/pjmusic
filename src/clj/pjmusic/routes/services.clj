@@ -15,21 +15,38 @@
 
 (defn- get-artist
   [{{{:keys [id]} :path} :parameters}]
-  (if-let [a (artist/get id)]
+  (if-let [a (artist/by-id id)]
     (ok a)
     (not-found)))
 
+(defn- get-releases
+  [{{{:keys [recent by-artist feature-artist]} :query} :parameters}]
+  (cond recent (-> (release/recent recent) ok)
+        by-artist (-> (release/by-artist by-artist) ok)
+        feature-artist (-> (release/feature-artist feature-artist) ok)
+        :else (-> [] ok)))
+
 (defn- get-release
-  [{{{:keys [id]} :path} :parameters}]
-  (if-let [r (release/get id)]
+  [{{{:keys [release-id]} :path} :parameters}]
+  (if-let [r (release/by-id release-id)]
     (ok r)
     (not-found)))
 
-(defn- recent-releases
-  [{{{:keys [recent]} :query} :parameters}]
-  (-> (or recent 10)
-      release/recent
-      ok))
+(defn- get-medias
+  [_]
+  (-> [] ok))
+
+(defn- get-media
+  [_]
+  (-> {} ok))
+
+(defn- get-tracks
+  [_]
+  (-> [] ok))
+
+(defn- get-track
+  [_]
+  (-> {} ok))
 
 (defn service-routes []
   ["/api"
@@ -58,9 +75,9 @@
 
    ["/releases"
     [""
-     {:get  {:parameters {:query {(ds/opt :recent)          pos-int?
-                                  (ds/opt :by-artist)       pos-int?
-                                  (ds/opt :features-artist) pos-int?}}
+     {:get  {:parameters {:query {(ds/opt :recent)         pos-int?
+                                  (ds/opt :by-artist)      pos-int?
+                                  (ds/opt :feature-artist) pos-int?}}
              :handler    get-releases}
 
       :post {;; TODO: create new release
