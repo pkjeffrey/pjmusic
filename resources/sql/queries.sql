@@ -136,3 +136,27 @@ INNER JOIN TRACK T
 WHERE T.ARTIST = :artist-id
   AND T.ARTIST <> R.ARTIST
 ORDER BY R.RELEASED, R.ADDED
+
+-- :name get-medias-by-release :? :*
+SELECT M.ID,
+       F.NAME FORMAT,
+       M.TITLE,
+       (SELECT COUNT(*) FROM TRACK WHERE MEDIA = M.ID) "NUM-TRACKS"
+FROM MEDIA M
+INNER JOIN FORMAT F
+    ON F.ID = M.FORMAT
+WHERE M.RELEASE = :release-id
+ORDER BY M.ID
+
+-- :name get-tracks-by-media :? :*
+SELECT T.ID,
+       T.SIDE,
+       T.NUMBER,
+       T.TITLE,
+       A.ID "ARTIST-ID",
+       A.NAME "ARTIST-NAME"
+FROM TRACK T
+INNER JOIN ARTIST A
+    ON A.ID = T.ARTIST
+WHERE T.MEDIA = :media-id
+ORDER BY T.SIDE, T.NUMBER

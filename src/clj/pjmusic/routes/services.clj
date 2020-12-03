@@ -4,7 +4,9 @@
     [pjmusic.middleware.exception :as exception]
     [pjmusic.middleware.formats :as formats]
     [pjmusic.model.artist :as artist]
+    [pjmusic.model.media :as media]
     [pjmusic.model.release :as release]
+    [pjmusic.model.track :as track]
     [reitit.coercion.spec :as spec-coercion]
     [reitit.ring.coercion :as coercion]
     [reitit.ring.middleware.multipart :as multipart]
@@ -33,20 +35,12 @@
     (not-found)))
 
 (defn- get-medias
-  [_]
-  (-> [] ok))
-
-(defn- get-media
-  [_]
-  (-> {} ok))
+  [{{{:keys [release-id]} :path} :parameters}]
+  (-> (media/by-release release-id) ok))
 
 (defn- get-tracks
-  [_]
-  (-> [] ok))
-
-(defn- get-track
-  [_]
-  (-> {} ok))
+  [{{{:keys [media-id]} :path} :parameters}]
+  (-> (track/by-media media-id) ok))
 
 (defn service-routes []
   ["/api"
@@ -106,9 +100,7 @@
        {:parameters {:path {:media-id pos-int?}}}
 
        [""
-        {:get    {:handler get-media}
-
-         :delete {;; TODO delete media
+        {:delete {;; TODO delete media
                   :handler (constantly no-content)}
 
          :put    {;; TODO update media
@@ -125,9 +117,7 @@
          {:parameters {:path {:track-id pos-int?}}}
 
          [""
-          {:get    {:handler get-track}
-
-           :delete {;; TODO delete track
+          {:delete {;; TODO delete track
                     :handler (constantly no-content)}
 
            :put    {;; TODO update track
