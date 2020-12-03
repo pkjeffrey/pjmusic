@@ -10,7 +10,8 @@
     [reitit.ring.middleware.multipart :as multipart]
     [reitit.ring.middleware.muuntaja :as muuntaja]
     [reitit.ring.middleware.parameters :as parameters]
-    [ring.util.http-response :refer :all]))
+    [ring.util.http-response :refer :all]
+    [spec-tools.data-spec :as ds]))
 
 (defn- get-artist
   [{{{:keys [id]} :path} :parameters}]
@@ -53,15 +54,67 @@
 
    ["/artists/:id"
     {:get {:parameters {:path {:id pos-int?}}
-           :handler get-artist}}]
+           :handler    get-artist}}]
 
    ["/releases"
-    {:get {:parameters {:query {:recent pos-int?}}
-           :handler recent-releases}}]
+    [""
+     {:get  {:parameters {:query {(ds/opt :recent)          pos-int?
+                                  (ds/opt :by-artist)       pos-int?
+                                  (ds/opt :features-artist) pos-int?}}
+             :handler    get-releases}
 
-   ["/releases/:id"
-    {:get {:parameters {:path {:id pos-int?}}
-           :handler get-release}}]
+      :post {;; TODO: create new release
+             :handler (constantly created)}}]
+
+    ["/:release-id"
+     {:parameters {:path {:release-id pos-int?}}}
+
+     [""
+      {:get    {:handler get-release}
+
+       :delete {;; TODO delete release
+                :handler (constantly no-content)}
+
+       :put    {;; TODO update release
+                :handler (constantly ok)}}]
+
+     ["/medias"
+      [""
+       {:get  {:handler get-medias}
+
+        :post {;; TODO add media
+               :handler (constantly created)}}]
+
+      ["/:media-id"
+       {:parameters {:path {:media-id pos-int?}}}
+
+       [""
+        {:get    {:handler get-media}
+
+         :delete {;; TODO delete media
+                  :handler (constantly no-content)}
+
+         :put    {;; TODO update media
+                  :handler (constantly ok)}}]
+
+       ["/tracks"
+        [""
+         {:get  {:handler get-tracks}
+
+          :post {;; TODO add track
+                 :handler (constantly created)}}]
+
+        ["/:track-id"
+         {:parameters {:path {:track-id pos-int?}}}
+
+         [""
+          {:get    {:handler get-track}
+
+           :delete {;; TODO delete track
+                    :handler (constantly no-content)}
+
+           :put    {;; TODO update track
+                    :handler (constantly ok)}}]]]]]]]
 
    ["/ping"
     {:get (constantly (ok {:message "pong"}))}]
