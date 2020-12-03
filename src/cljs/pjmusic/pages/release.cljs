@@ -3,7 +3,8 @@
     [ajax.core :as ajax]
     [goog.string :as gstr]
     [goog.string.format]
-    [re-frame.core :as rf]))
+    [re-frame.core :as rf]
+    [reitit.frontend.easy :as rfe]))
 
 (rf/reg-event-db
   :set-release
@@ -36,7 +37,7 @@
       [:div.release-art [:img {:src (str "/img/releases/" id)}]]
       [:p.title title]
       [:p.artist (if compilation "In: " "By: ")
-       [:a {:href (str "#/artist/" artistid)} artistname]]
+       [:a {:href (rfe/href :artist {:id artistid})} artistname]]
       [:p.media media-descr]
       [:p.released "Released: " released]
       (when label [:p.label "Label: " label])
@@ -50,4 +51,4 @@
             [:li {:key (str side "-" number)}
              side "-" (gstr/format "%02d" number) " " title
              (when compilation " - by ")
-             (when compilation [:a {:href (str "#/artist/" artistid)} artistname])])]])]]))
+             (when compilation [:a {:href (rfe/href :artist {:id artistid})} artistname])])]])]]))

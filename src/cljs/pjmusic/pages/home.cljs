@@ -1,7 +1,8 @@
 (ns pjmusic.pages.home
   (:require
     [ajax.core :as ajax]
-    [re-frame.core :as rf]))
+    [re-frame.core :as rf]
+    [reitit.frontend.easy :as rfe]))
 
 (rf/reg-event-db
   :set-recents
@@ -34,11 +35,11 @@
     (when-let [recents @(rf/subscribe [:recents])]
       (for [{:keys [id title artistid artistname released compilation media-descr]} recents]
         [:div.release-item {:key id}
-         [:a {:href  (str "#/release/" id)
+         [:a {:href  (rfe/href :release {:id id})
               :title title}
           [:img {:src (str "/img/releases/" id)}]]
          [:p.title
-          [:a {:href (str "#/release/" id)} title]]
+          [:a {:href (rfe/href :release {:id id})} title]]
          [:p.artist (if compilation "In: " "By: ")
-          [:a {:href (str "#/artist/" artistid)} artistname]]
+          [:a {:href (rfe/href :artist {:id artistid})} artistname]]
          [:p.released released " " media-descr]]))]])
