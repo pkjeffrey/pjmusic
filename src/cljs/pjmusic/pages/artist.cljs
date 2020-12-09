@@ -1,21 +1,42 @@
 (ns pjmusic.pages.artist
   (:require
     [ajax.core :as ajax]
-    [re-frame.core :as rf]
-    [reitit.frontend.easy :as rfe]))
+    [pjmusic.pages.components :as comp]
+    [re-frame.core :as rf]))
 
 (rf/reg-event-db
   :set-artist
-  (fn [db [_ artist]]
-    (assoc db :artist artist)))
+  (fn [{:keys [artist] :as db} [_ new-artist]]
+    (assoc db :artist (merge artist new-artist))))
+
+(rf/reg-event-db
+  :set-artist-releases
+  (fn [db [_ releases]]
+    (assoc-in db [:artist :releases] releases)))
+
+(rf/reg-event-db
+  :set-artist-appears-on
+  (fn [db [_ appears-on]]
+    (assoc-in db [:artist :appears-on] appears-on)))
 
 (rf/reg-event-fx
   :fetch-artist
-  (fn [_ [_ id]]
-    {:http-xhrio {:method          :get
-                  :uri             (str "/api/artists/" id)
-                  :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success      [:set-artist]}}))
+  (fn [{:keys [db]} [_ id]]
+    {:db (assoc db :artist {})
+     :fx [[:http-xhrio {:method          :get
+                        :uri             (str "/api/artists/" id)
+                        :response-format (ajax/json-response-format {:keywords? true})
+                        :on-success      [:set-artist]}]
+          [:http-xhrio {:method          :get
+                        :uri             "/api/releases"
+                        :params          {:by-artist id}
+                        :response-format (ajax/json-response-format {:keywords? true})
+                        :on-success      [:set-artist-releases]}]
+          [:http-xhrio {:method          :get
+                        :uri             "/api/releases"
+                        :params          {:feature-artist id}
+                        :response-format (ajax/json-response-format {:keywords? true})
+                        :on-success      [:set-artist-appears-on]}]]}))
 
 (rf/reg-event-fx
   :artist/init
@@ -27,30 +48,30 @@
   (fn [db _]
     (:artist db)))
 
+(rf/reg-sub
+  :artist-name
+  :<- [:artist]
+  (fn [artist _]
+    (:name artist)))
+
+(rf/reg-sub
+  :artist-releases
+  :<- [:artist]
+  (fn [artist _]
+    (map #(dissoc % :artist-id) (:releases artist))))
+
+(rf/reg-sub
+  :artist-appears-on
+  :<- [:artist]
+  (fn [artist _]
+    (:appears-on artist)))
+
 (defn artist-page []
-  (when-let [{:keys [name releases appears-on]} @(rf/subscribe [:artist])]
+  (let [name @(rf/subscribe [:artist-name])
+        releases @(rf/subscribe [:artist-releases])
+        appears-on @(rf/subscribe [:artist-appears-on])]
     [:section
      [:h2 name]
-     [:div.release-list
-      (for [{:keys [id title released media-descr]} releases]
-        [:div.release-item {:key id}
-         [:a {:href (rfe/href :release {:id id})
-              :title title}
-          [:img {:src (str "/img/releases/" id)}]]
-         [:p.title
-          [:a {:href (rfe/href :release {:id id})} title]]
-         [:p.released released " " media-descr]])]
-     (when (seq appears-on)
-       [:h2 "Appears on"])
-     (when (seq appears-on)
-       [:div.release-list
-        (for [{:keys [id title artistid artistname released compilation media-descr]} appears-on]
-          [:div.release-item {:key id}
-           [:a {:href (rfe/href :release {:id id})
-                :title title}
-            [:img {:src (str "/img/releases/" id)}]]
-           [:p.title
-            [:a {:href (rfe/href :release {:id id})} title]]
-           [:p.artist (if compilation "In: " "By: ")
-            [:a {:href (rfe/href :artist {:id artistid})} artistname]]
-           [:p.released released " " media-descr]])])]))
+     [comp/release-list releases]
+     (when (seq appears-on) [:h2 "Appears on"])
+     [comp/release-list appears-on]]))

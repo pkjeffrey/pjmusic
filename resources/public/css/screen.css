@@ -4,19 +4,25 @@
 
 html,
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: #444444;
+    font-family: "Helvetica Neue", "Helvetica N", Helvetica, Arial, sans-serif;
+    background-color: white;
+    color: darkblue;
     margin: 0;
 }
 
 a:link,
-a:visited{
-    color: #444444;
+a:visited {
     text-decoration: none;
+    color: chocolate;
 }
+
 a:hover,
 a:active {
-    color: #ff9900
+    color: coral;
+}
+
+img {
+    width: 100%;
 }
 
 .page {
@@ -25,25 +31,13 @@ a:active {
 }
 
 header {
+    background-color: ghostwhite;
     display: grid;
     grid-template-columns: auto 1fr auto;
-    background-color: #fafafa;
-    border-bottom: 1px solid #e8e8e8;
+    border-bottom: 1px solid darkblue;
 }
 
-header .left {
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-}
-
-header .middle {
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-}
-
-header .right {
+header > div {
     display: flex;
     align-items: center;
     padding: 0 1rem;
@@ -54,17 +48,8 @@ header .logo {
     width: auto;
 }
 
-img {
-    width: 100%;
-}
-
 section {
     padding: 0 1rem;
-}
-
-.title {
-    font-size: 1.2rem;
-    font-weight: 700;
 }
 
 .release-list {
@@ -72,43 +57,71 @@ section {
     flex-wrap: wrap;
 }
 
-.release-list .release-item {
-    width: 210px;
-    margin: 0 1rem 1rem 1rem;
+.release-item {
+    width: 240px;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    background-color: white;
+    border: 1px solid darkblue;
+    border-radius: 4px;
+    box-shadow: 5px 5px 8px dimgrey;
     padding: 5px;
-    border: 1px solid #e8e8e8;
-    box-shadow: 5px 5px 8px #aaaaaa;
+    margin-right: 1rem;
+    margin-bottom: 1rem;
 }
 
-.release-list .released {
-    font-size: 0.8rem;
+.release-item > div {
+    margin-bottom: 0.5rem;
+}
+
+.release-item > div:last-child {
+    margin-bottom: 0;
+}
+
+.release-item .released {
+    font-size: smaller;
+    text-align: right;
 }
 
 .release {
-    margin: 1.2rem 0;
+    margin-top: 1rem;
     overflow: auto;
 }
 
-.release .title {
-    font-size: 1.5rem;
+.release h2 {
     margin-top: 0;
 }
 
-.release-art {
+.release > div {
+    margin-bottom: 0.5rem;
+}
+
+.release > .release-art {
     width: 320px;
     float: left;
-    border: 1px solid #e8e8e8;
     margin-right: 1rem;
 }
 
-.release .media,
-.release .released,
-.release .label,
-.release .catalog {
-    margin: 0 0 0.4rem 0;
+.media-tracks {
+    min-width: 600px;
+    margin-bottom: 1rem;
 }
 
-.medias ul {
-    list-style: none;
-    padding: 0;
+.title,
+.artist > a {
+    font-weight: bold;
+}
+
+th {
+    text-align: left;
+    padding-top: 0.5rem;
+}
+
+td {
+    vertical-align: top;
+    padding-right: .6rem;
+}
+
+td.number {
+    text-align: right;
 }

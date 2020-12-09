@@ -1,8 +1,3 @@
--- :name get-artist :? :1
-SELECT NAME
-FROM ARTIST
-WHERE ID = :id
-
 -- :name get-artists :? :*
 SELECT ID,
        NAME
@@ -74,6 +69,12 @@ WHERE T.MEDIA = :id
 ORDER BY T.SIDE, T.NUMBER
 
 -- ==================================================================
+
+-- :name get-artist :? :1
+SELECT ID,
+       NAME
+FROM ARTIST
+WHERE ID = :id
 
 -- :name get-release :? :1
 SELECT R.ID,

@@ -1,23 +1,52 @@
 (ns pjmusic.pages.release
   (:require
     [ajax.core :as ajax]
-    [goog.string :as gstr]
-    [goog.string.format]
-    [re-frame.core :as rf]
-    [reitit.frontend.easy :as rfe]))
+    [pjmusic.pages.components :as comp]
+    [re-frame.core :as rf]))
 
 (rf/reg-event-db
   :set-release
-  (fn [db [_ release]]
-    (assoc db :release release)))
+  (fn [{:keys [release] :as db} [_ new-release]]
+    (assoc db :release (merge release new-release))))
+
+(rf/reg-event-db
+  :set-media-tracks
+  (fn [db [_ media-id tracks]]
+    (let [sides (-> (map :side tracks) distinct count)
+          tracks (if (= 1 sides)
+                   (map #(dissoc % :side) tracks)
+                   tracks)
+          medias (get-in db [:release :medias])
+          new-medias (reduce (fn [acc {:keys [id] :as media}]
+                               (conj acc (if (= media-id id)
+                                           (assoc media :tracks tracks)
+                                           media)))
+                             [] medias)]
+      (assoc-in db [:release :medias] new-medias))))
+
+(rf/reg-event-fx
+  :set-release-medias
+  (fn [{:keys [db]} [_ release-id medias]]
+    {:db (assoc-in db [:release :medias] medias)
+     :fx (mapv (fn [{:keys [id]}]
+                 [:http-xhrio {:method          :get
+                               :uri             (str "/api/releases/" release-id "/medias/" id "/tracks")
+                               :response-format (ajax/json-response-format {:keywords? true})
+                               :on-success      [:set-media-tracks id]}])
+               medias)}))
 
 (rf/reg-event-fx
   :fetch-release
-  (fn [_ [_ id]]
-    {:http-xhrio {:method          :get
-                  :uri             (str "/api/releases/" id)
-                  :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success      [:set-release]}}))
+  (fn [{:keys [db]} [_ id]]
+    {:db (assoc db :release {})
+     :fx [[:http-xhrio {:method          :get
+                        :uri             (str "/api/releases/" id)
+                        :response-format (ajax/json-response-format {:keywords? true})
+                        :on-success      [:set-release]}]
+          [:http-xhrio {:method          :get
+                        :uri             (str "/api/releases/" id "/medias")
+                        :response-format (ajax/json-response-format {:keywords? true})
+                        :on-success      [:set-release-medias id]}]]}))
 
 (rf/reg-event-fx
   :release/init
@@ -29,26 +58,23 @@
   (fn [db _]
     (:release db)))
 
+(rf/reg-sub
+  :release-details
+  :<- [:release]
+  (fn [release _]
+    (select-keys release [:id :title :artist-id :artist-name :compilation
+                          :media-descr :released :label :catalog])))
+
+(rf/reg-sub
+  :release-medias
+  :<- [:release]
+  (fn [release _]
+    (:medias release)))
+
 (defn release-page []
-  (when-let [{:keys [id title artistid artistname released compilation media-descr
-                     label catalog medias]} @(rf/subscribe [:release])]
-    [:section
-     [:div.release
-      [:div.release-art [:img {:src (str "/img/releases/" id)}]]
-      [:p.title title]
-      [:p.artist (if compilation "In: " "By: ")
-       [:a {:href (rfe/href :artist {:id artistid})} artistname]]
-      [:p.media media-descr]
-      [:p.released "Released: " released]
-      (when label [:p.label "Label: " label])
-      (when catalog [:p.catalog "Catalog: " catalog])]
-     [:div.medias
-      (for [{:keys [id name title tracks]} medias]
-        [:div {:key id}
-         [:p.title name " " title]
-         [:ul
-          (for [{:keys [side number title artistid artistname]} tracks]
-            [:li {:key (str side "-" number)}
-             side "-" (gstr/format "%02d" number) " " title
-             (when compilation " - by ")
-             (when compilation [:a {:href (rfe/href :artist {:id artistid})} artistname])])]])]]))
+  (let [{:keys [id compilation] :as release-details} @(rf/subscribe [:release-details])
+        medias @(rf/subscribe [:release-medias])]
+    (when id
+      [:section
+       [comp/release release-details]
+       [comp/release-medias medias compilation]])))
