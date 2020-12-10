@@ -13,13 +13,11 @@
   :set-media-tracks
   (fn [db [_ media-id tracks]]
     (let [sides (-> (map :side tracks) distinct count)
-          tracks (if (= 1 sides)
-                   (map #(dissoc % :side) tracks)
-                   tracks)
           medias (get-in db [:release :medias])
           new-medias (reduce (fn [acc {:keys [id] :as media}]
                                (conj acc (if (= media-id id)
-                                           (assoc media :tracks tracks)
+                                           (assoc media :sides sides
+                                                        :tracks tracks)
                                            media)))
                              [] medias)]
       (assoc-in db [:release :medias] new-medias))))

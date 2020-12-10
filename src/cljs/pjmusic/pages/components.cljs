@@ -64,9 +64,9 @@
    (when catalog [:div.catalog "Catalog: " catalog])])
 
 (defn media-track
-  [{:keys [side number title artist-id artist-name]} compilation]
+  [{:keys [side number title artist-id artist-name]} sides compilation]
   [:tr
-   (when side [:td.number side])
+   [:td.number (if (= 1 sides) " " side)]
    [:td.number number]
    [:td title]
    (when compilation [:td>a {:href (artist-href artist-id)} artist-name])])
@@ -74,8 +74,8 @@
 (defn release-medias
   [medias compilation]
   [:div.media-tracks>table>tbody
-   (for [{:keys [id format title tracks]} medias]
+   (for [{:keys [id format title sides tracks]} medias]
      (list [:tr {:key id}
             [:th.title {:col-span 4} format " " title]]
            (for [{:keys [side number] :as track} tracks]
-             [media-track (assoc track :key (str side "-" number)) compilation])))])
+             [media-track (assoc track :key (str side "-" number)) sides compilation])))])
