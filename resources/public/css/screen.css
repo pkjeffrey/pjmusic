@@ -21,10 +21,6 @@ a:active {
     color: coral;
 }
 
-img {
-    width: 100%;
-}
-
 .page {
     display: grid;
     grid-template-rows: auto 1fr;
@@ -58,7 +54,7 @@ section {
 }
 
 .release-item {
-    width: 240px;
+    width: 232px;
     display: grid;
     grid-template-rows: auto auto 1fr auto;
     background-color: white;
@@ -68,6 +64,11 @@ section {
     padding: 5px;
     margin-right: 1rem;
     margin-bottom: 1rem;
+}
+
+.release-item img {
+    width: 220px;
+    height: 220px;
 }
 
 .release-item > div {
@@ -86,6 +87,11 @@ section {
 .release {
     margin-top: 1rem;
     overflow: auto;
+}
+
+.release img {
+    width: 320px;
+    height: 320px;
 }
 
 .release h2 {
