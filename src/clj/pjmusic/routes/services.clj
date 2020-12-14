@@ -15,6 +15,10 @@
     [ring.util.http-response :refer :all]
     [spec-tools.data-spec :as ds]))
 
+(defn- get-artists-like
+  [{{{:keys [like]} :query} :parameters}]
+  (-> (artist/like like) ok))
+
 (defn- get-artist
   [{{{:keys [id]} :path} :parameters}]
   (if-let [a (artist/by-id id)]
@@ -63,9 +67,14 @@
                  ;; multipart
                  multipart/multipart-middleware]}
 
-   ["/artists/:id"
-    {:get {:parameters {:path {:id pos-int?}}
-           :handler    get-artist}}]
+   ["/artists"
+    [""
+     {:get {:parameters {:query {:like string?}}
+            :handler    get-artists-like}}]
+
+    ["/:id"
+     {:get {:parameters {:path {:id pos-int?}}
+            :handler    get-artist}}]]
 
    ["/releases"
     [""

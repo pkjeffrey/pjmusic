@@ -76,6 +76,13 @@ SELECT ID,
 FROM ARTIST
 WHERE ID = :id
 
+-- :name get-artists-like :? :*
+SELECT ID,
+       NAME
+FROM ARTIST
+WHERE NAME LIKE :like-lower
+OR NAME LIKE :like-upper
+
 -- :name get-release :? :1
 SELECT R.ID,
        A.ID "ARTIST-ID",
