@@ -7,8 +7,9 @@
     [pjmusic.ajax :as ajax]
     [pjmusic.events]
     [pjmusic.pages.artist :refer [artist-page]]
-    [pjmusic.pages.release :refer [release-page]]
     [pjmusic.pages.home :refer [home-page]]
+    [pjmusic.pages.release :refer [release-page]]
+    [pjmusic.pages.test :refer [test-page]]
     [re-frame.core :as rf]
     [reagent.core :as r]
     [reagent.dom :as rdom]
@@ -23,7 +24,9 @@
    [:div.left
     [:a {:href "#/"} [:img.logo {:src "/img/logo.png" :alt "Peter's Music logo"}]]
     [:a {:href "#/"} [:h1 "Peter's Music"]]]
-   [:div.middle "Search"]
+   [:div.middle
+    [:span "Search"]
+    [:a {:href "#/test"} "Test"]]
    [:div.right "User"]])
 
 (defn page []
@@ -42,17 +45,20 @@
        :view        #'home-page
        :controllers [{:start (fn [_] (rf/dispatch [:home/init 12]))}]}]
      ["/artist/:id"
-      {:name       :artist
-       :view       #'artist-page
-       :parameters {:path {:id pos-int?}}
+      {:name        :artist
+       :view        #'artist-page
+       :parameters  {:path {:id pos-int?}}
        :controllers [{:parameters {:path [:id]}
-                      :start (fn [params] (rf/dispatch [:artist/init (-> params :path :id)]))}]}]
+                      :start      (fn [params] (rf/dispatch [:artist/init (-> params :path :id)]))}]}]
      ["/release/:id"
-      {:name       :release
-       :view       #'release-page
-       :parameters {:path {:id pos-int?}}
+      {:name        :release
+       :view        #'release-page
+       :parameters  {:path {:id pos-int?}}
        :controllers [{:parameters {:path [:id]}
-                      :start (fn [params] (rf/dispatch [:release/init (-> params :path :id)]))}]}]]
+                      :start      (fn [params] (rf/dispatch [:release/init (-> params :path :id)]))}]}]
+     ["/test"
+      {:name :test
+       :view #'test-page}]]
     {:coercion spec-coercion/coercion
      :compile  coercion/compile-request-coercers}))
 

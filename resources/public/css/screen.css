@@ -131,3 +131,50 @@ td {
 td.number {
     text-align: right;
 }
+
+/* temp form */
+
+.form {
+    margin: 0 auto;
+    width: 450px;
+    padding: 1em;
+    border: 1px solid #ccc;
+    border-radius: 1em;
+}
+.field,
+.button {
+    margin-top: 1em;
+}
+label {
+    display: inline-block;
+    width: 90px;
+    text-align: right;
+    margin-right: .5em;
+}
+input {
+    width: 250px;
+    border: 1px solid #999;
+    font-family: "Helvetica Neue", "Helvetica N", Helvetica, Arial, sans-serif;
+    font-size: 1em;
+    color: darkblue;
+    padding: .5em;
+}
+input:focus {
+    border-color: #000;
+}
+.button {
+    padding-left: 90px;
+}
+.result p {
+    border: 1px solid blue;
+    padding: .5em;
+}
+.suggestions {
+    background-color: #eeeeee;
+}
+.suggestion {
+    padding: .5em;
+}
+.suggestions .active {
+    background-color: #999999;
+}
